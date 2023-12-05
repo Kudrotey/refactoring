@@ -66,10 +66,11 @@ def statement(invoice, plays):
         locale.setlocale(locale.LC_ALL, '')
         return locale.currency(aNumber/100, grouping=True)
     
-    for perf in invoice['performances']:        
-                
+    for perf in invoice['performances']:               
         # print line for this order
         result += f"    {playFor(perf).get('name')}: {usd(amountFor(perf))} ({perf.get('audience')} seats)\n"
+        
+    for perf in invoice['performances']:               
         totalAmount += amountFor(perf)
     
     result += f"Amount owed is {usd(totalAmount)}\n"
