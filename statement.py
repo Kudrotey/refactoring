@@ -56,6 +56,12 @@ def statement(invoice, plays):
         if "comedy" == playFor(aPerformance).get('type'): result += math.floor(aPerformance.get('audience') / 5)
         return result
     
+    def totalVolumeCredits():
+        volumeCredits = 0        
+        for perf in invoice['performances']:
+            volumeCredits += volumeCreditsFor(perf)
+        return volumeCredits
+    
     def usd(aNumber):
         locale.setlocale(locale.LC_ALL, '')
         return locale.currency(aNumber/100, grouping=True)
@@ -65,13 +71,10 @@ def statement(invoice, plays):
         # print line for this order
         result += f"    {playFor(perf).get('name')}: {usd(amountFor(perf))} ({perf.get('audience')} seats)\n"
         totalAmount += amountFor(perf)
-        
-    volumeCredits = 0        
-    for perf in invoice['performances']:
-        volumeCredits += volumeCreditsFor(perf)
-        
+    
+    totalVolumeCredits = totalVolumeCredits()
     result += f"Amount owed is {usd(totalAmount)}\n"
-    result += f"You earned {volumeCredits} credits"
+    result += f"You earned {totalVolumeCredits} credits"
     return result
         
 
