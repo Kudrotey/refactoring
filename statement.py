@@ -52,10 +52,10 @@ def statement(invoice, plays):
                 raise Exception(f"unknown type: {playFor(perf).get('type')}")
         return result
     
-    def volumeCreditsFor(perf):
+    def volumeCreditsFor(aPerformance):
         result = 0
-        result += max(perf.get('audience') - 30, 0)
-        if "comedy" == playFor(perf).get('type'): result += math.floor(perf.get('audience') / 5)
+        result += max(aPerformance.get('audience') - 30, 0)
+        if "comedy" == playFor(aPerformance).get('type'): result += math.floor(aPerformance.get('audience') / 5)
         return result
     
     for perf in invoice['performances']:        
