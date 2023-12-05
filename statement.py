@@ -1,7 +1,6 @@
 import locale
 import math
 
-locale.setlocale(locale.LC_ALL, '')
 
 plays = {
     "hamlet": {"name": "Hamlet", "type": "tragedy"},
@@ -58,14 +57,18 @@ def statement(invoice, plays):
         if "comedy" == playFor(aPerformance).get('type'): result += math.floor(aPerformance.get('audience') / 5)
         return result
     
+    def usd(aNumber):
+        locale.setlocale(locale.LC_ALL, '')
+        return locale.currency(aNumber/100, grouping=True)
+    
     for perf in invoice['performances']:        
         volumeCredits += volumeCreditsFor(perf)
         
         # print line for this order
-        result += f"    {playFor(perf).get('name')}: {locale.currency(amountFor(perf)/100, grouping=True)} ({perf.get('audience')} seats)\n"
+        result += f"    {playFor(perf).get('name')}: {usd(amountFor(perf))} ({perf.get('audience')} seats)\n"
         totalAmount += amountFor(perf)
         
-    result += f"Amount owed is {locale.currency(totalAmount/100, grouping=True)}\n"
+    result += f"Amount owed is {usd(totalAmount)}\n"
     result += f"You earned {volumeCredits} credits"
     return result
         
