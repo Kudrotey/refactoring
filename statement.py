@@ -32,22 +32,23 @@ def statement(invoice, plays):
     totalAmount = 0
     volumeCredit = 0
     result = f"Statement for {invoice['customer']}\n"
+
     
     def amountFor(perf, play):
-        thisAmount = 0
+        result = 0
         match play.get('type'):
             case "tragedy":
-                thisAmount = 40000
+                result = 40000
                 if perf.get('audience') > 30:
-                    thisAmount += 1000 * (perf.get('audience') - 30)
+                    result += 1000 * (perf.get('audience') - 30)
             case "comedy":
-                thisAmount = 30000
+                result = 30000
                 if perf.get('audience') > 20:
-                    thisAmount += 10000 + 500 * (perf.get('audience') - 20)
-                thisAmount += 300 * perf.get('audience')
+                    result += 10000 + 500 * (perf.get('audience') - 20)
+                result += 300 * perf.get('audience')
             case _:
                 raise Exception(f"unknown type: {play.get('type')}")
-        return thisAmount
+        return result
     
     for perf in invoice['performances']:
         play = plays[perf.get('playID')]
