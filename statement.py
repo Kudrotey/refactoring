@@ -30,7 +30,7 @@ invoices = {
 
 def statement(invoice, plays):
     totalAmount = 0
-    volumeCredit = 0
+    volumeCredits = 0
     result = f"Statement for {invoice['customer']}\n"
 
     def playFor(aPerformance):
@@ -54,16 +54,16 @@ def statement(invoice, plays):
     
     for perf in invoice['performances']:        
         # add volume credits
-        volumeCredit += max(perf.get('audience') - 30, 0)
+        volumeCredits += max(perf.get('audience') - 30, 0)
         # add extra credit for every ten comedy attendees
-        if "comedy" == playFor(perf).get('type'): volumeCredit += math.floor(perf.get('audience') / 5)
+        if "comedy" == playFor(perf).get('type'): volumeCredits += math.floor(perf.get('audience') / 5)
         
         # print line for this order
         result += f"    {playFor(perf).get('name')}: {locale.currency(amountFor(perf)/100, grouping=True)} ({perf.get('audience')} seats)\n"
         totalAmount += amountFor(perf)
         
     result += f"Amount owed is {locale.currency(totalAmount/100, grouping=True)}\n"
-    result += f"You earned {volumeCredit} credits"
+    result += f"You earned {volumeCredits} credits"
     return result
         
 
