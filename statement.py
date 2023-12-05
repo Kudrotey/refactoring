@@ -36,7 +36,7 @@ def statement(invoice, plays):
     def playFor(aPerformance):
         return plays[aPerformance.get('playID')]
     
-    def amountFor(aPerformance, play):
+    def amountFor(aPerformance):
         result = 0
         match playFor(perf).get('type'):
             case "tragedy":
@@ -53,7 +53,7 @@ def statement(invoice, plays):
         return result
     
     for perf in invoice['performances']:
-        thisAmount = amountFor(perf, playFor(perf))
+        thisAmount = amountFor(perf)
         
         # add volume credits
         volumeCredit += max(perf.get('audience') - 30, 0)
