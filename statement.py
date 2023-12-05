@@ -53,10 +53,10 @@ def statement(invoice, plays):
         return result
     
     def volumeCreditsFor(perf):
-        volumeCredits = 0
-        volumeCredits += max(perf.get('audience') - 30, 0)
-        if "comedy" == playFor(perf).get('type'): volumeCredits += math.floor(perf.get('audience') / 5)
-        return volumeCredits
+        result = 0
+        result += max(perf.get('audience') - 30, 0)
+        if "comedy" == playFor(perf).get('type'): result += math.floor(perf.get('audience') / 5)
+        return result
     
     for perf in invoice['performances']:        
         volumeCredits += volumeCreditsFor(perf)
