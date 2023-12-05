@@ -32,12 +32,9 @@ def statement(invoice, plays):
     totalAmount = 0
     volumeCredit = 0
     result = f"Statement for {invoice['customer']}\n"
-    # format = moneyfmt(value=thisAmount/100, places=2, curr="$", sep=",", dp=".")
     
-    for perf in invoice['performances']:
-        play = plays[perf.get('playID')]
+    def amountFor(perf, play):
         thisAmount = 0
-        
         match play.get('type'):
             case "tragedy":
                 thisAmount = 40000
@@ -50,6 +47,12 @@ def statement(invoice, plays):
                 thisAmount += 300 * perf.get('audience')
             case _:
                 raise Exception(f"unknown type: {play.get('type')}")
+        return thisAmount
+    
+    for perf in invoice['performances']:
+        play = plays[perf.get('playID')]
+        thisAmount = amountFor(perf, play)
+        
         
         # add volume credits
         volumeCredit += max(perf.get('audience') - 30, 0)
