@@ -33,6 +33,8 @@ def statement(invoice, plays):
     volumeCredit = 0
     result = f"Statement for {invoice['customer']}\n"
 
+    def playFor(aPerformance):
+        return plays[aPerformance.get('playID')]
     
     def amountFor(aPerformance, play):
         result = 0
@@ -51,7 +53,7 @@ def statement(invoice, plays):
         return result
     
     for perf in invoice['performances']:
-        play = plays[perf.get('playID')]
+        play = playFor(perf)
         thisAmount = amountFor(perf, play)
         
         
