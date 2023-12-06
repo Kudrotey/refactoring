@@ -30,6 +30,29 @@ invoices = {
 def statement(invoice, plays):
     result = f"Statement for {invoice['customer']}\n"
 
+    # def totalAmount():
+    #     result = 0  
+    #     for perf in invoice['performances']:               
+    #         result += amountFor(perf)
+    #     return result
+    
+    def totalVolumeCredits():
+        result = 0        
+        for perf in invoice['performances']:
+            result += volumeCreditsFor(perf)
+        return result
+    
+    def usd(aNumber):
+        locale.setlocale(locale.LC_ALL, '')
+        return locale.currency(aNumber/100, grouping=True)
+    
+    def volumeCreditsFor(aPerformance):
+        result = 0
+        result += max(aPerformance.get('audience') - 30, 0)
+        if "comedy" == playFor(aPerformance).get('type'): 
+            result += math.floor(aPerformance.get('audience') / 5)
+        return result
+
     def playFor(aPerformance):
         return plays[aPerformance.get('playID')]
     
@@ -41,39 +64,31 @@ def statement(invoice, plays):
                 if aPerformance.get('audience') > 30:
                     result += 1000 * (aPerformance.get('audience') - 30)
             case "comedy":
-                result = 30000
+                result = 40000
                 if aPerformance.get('audience') > 20:
-                    result += 10000 + 500 * (aPerformance.get('audience') - 20)
+                    result += 500 * (aPerformance.get('audience') - 20)
                 result += 300 * aPerformance.get('audience')
             case _:
                 raise Exception(f"unknown type: {playFor(perf).get('type')}")
         return result
     
-    def volumeCreditsFor(aPerformance):
-        result = 0
-        result += max(aPerformance.get('audience') - 30, 0)
-        if "comedy" == playFor(aPerformance).get('type'): result += math.floor(aPerformance.get('audience') / 5)
-        return result
-    
-    def totalVolumeCredits():
-        volumeCredits = 0        
-        for perf in invoice['performances']:
-            volumeCredits += volumeCreditsFor(perf)
-        return volumeCredits
-    
-    def usd(aNumber):
-        locale.setlocale(locale.LC_ALL, '')
-        return locale.currency(aNumber/100, grouping=True)
-    
+
     for perf in invoice['performances']:               
-        # print line for this order
         result += f"    {playFor(perf).get('name')}: {usd(amountFor(perf))} ({perf.get('audience')} seats)\n"
     
-    totalAmount = 0  
-    for perf in invoice['performances']:               
-        totalAmount += amountFor(perf)
+    # totalAmount = 0  
+    # for perf in invoice['performances']:               
+    #     totalAmount += amountFor(perf)
+    #     print(f"totalAmount: {totalAmount}")
+        
+    def totalAmount():
+        result = 0  
+        for perf in invoice['performances']:               
+            result += amountFor(perf)
+        return result
     
-    result += f"Amount owed is {usd(totalAmount)}\n"
+    
+    result += f"Amount owed is {usd(totalAmount())}\n"
     result += f"You earned {totalVolumeCredits()} credits"
     return result
         
