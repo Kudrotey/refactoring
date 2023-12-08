@@ -40,8 +40,9 @@ class Statement():
     
     def enrichPerformance(self, aPerformance):
         result = aPerformance
-        result['play'] = self.playFor(aPerformance)
+        result['play'] = self.playFor(result)
         result['amount'] = self.amountFor(result)
+        result['volumeCredits'] = self.volumeCreditsFor(result)
         return result
     
     def playFor(self, aPerformance):
@@ -61,6 +62,13 @@ class Statement():
                 result += 300 * aPerformance.get('audience')
             case _:
                 raise Exception(f"unknown type: {aPerformance['play'].get('type')}")
+        return result
+    
+    def volumeCreditsFor(self, aPerformance):
+        result = 0
+        result += max(aPerformance.get('audience') - 30, 0)
+        if "comedy" == aPerformance['play'].get('type'): 
+            result += math.floor(aPerformance.get('audience') / 5)
         return result
 
 class RenderPlainText():
@@ -89,19 +97,14 @@ class RenderPlainText():
     def totalVolumeCredits(self):
         result = 0        
         for perf in self.data['performances']:
-            result += self.volumeCreditsFor(perf)
+            result += perf['volumeCredits']
         return result
     
     def usd(self, aNumber):
         locale.setlocale(locale.LC_ALL, '')
         return locale.currency(aNumber/100, grouping=True)
     
-    def volumeCreditsFor(self, aPerformance):
-        result = 0
-        result += max(aPerformance.get('audience') - 30, 0)
-        if "comedy" == aPerformance['play'].get('type'): 
-            result += math.floor(aPerformance.get('audience') / 5)
-        return result
+
     
     
 print(Statement(invoice=invoices, plays=plays)())
