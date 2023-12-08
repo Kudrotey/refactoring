@@ -35,8 +35,16 @@ class Statement():
     def __call__(self):
         statementData = {}
         statementData["customer"] = self.invoice.get("customer")
-        statementData["performances"] = self.invoice.get("performances")
+        statementData["performances"] = list(map(self.enrichPerformance, self.invoice.get("performances")))
         return RenderPlainText(statementData, self.plays)()
+    
+    def enrichPerformance(self, aPerformance):
+        result = aPerformance
+        result['play'] = self.playFor(aPerformance)
+        return result
+    
+    def playFor(self, aPerformance):
+        return self.plays[aPerformance.get("playID")]
 
 class RenderPlainText():
     
@@ -49,7 +57,7 @@ class RenderPlainText():
         result = f"Statement for {self.data['customer']}\n"
         
         for perf in self.data['performances']:               
-            result += f"    {self.playFor(perf).get('name')}: {self.usd(self.amountFor(perf))} ({perf.get('audience')} seats)\n"
+            result += f"    {perf['play'].get('name')}: {self.usd(self.amountFor(perf))} ({perf.get('audience')} seats)\n"
         
         result += f"Amount owed is {self.usd(self.totalAmount())}\n"
         result += f"You earned {self.totalVolumeCredits()} credits"
@@ -74,16 +82,13 @@ class RenderPlainText():
     def volumeCreditsFor(self, aPerformance):
         result = 0
         result += max(aPerformance.get('audience') - 30, 0)
-        if "comedy" == self.playFor(aPerformance).get('type'): 
+        if "comedy" == aPerformance['play'].get('type'): 
             result += math.floor(aPerformance.get('audience') / 5)
         return result
-
-    def playFor(self, aPerformance):
-        return plays[aPerformance.get('playID')]
     
     def amountFor(self, aPerformance):
         result = 0
-        match self.playFor(aPerformance).get('type'):
+        match aPerformance['play'].get('type'):
             case "tragedy":
                 result = 40000
                 if aPerformance.get('audience') > 30:
@@ -94,7 +99,7 @@ class RenderPlainText():
                     result += 500 * (aPerformance.get('audience') - 20)
                 result += 300 * aPerformance.get('audience')
             case _:
-                raise Exception(f"unknown type: {self.playFor(aPerformance).get('type')}")
+                raise Exception(f"unknown type: {aPerformance['play'].get('type')}")
         return result
     
     
