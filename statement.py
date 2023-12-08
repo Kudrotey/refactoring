@@ -36,6 +36,8 @@ class Statement():
         statementData = {}
         statementData["customer"] = self.invoice.get("customer")
         statementData["performances"] = list(map(self.enrichPerformance, self.invoice.get("performances")))
+        statementData["totalAmount"] = self.totalAmount(statementData)
+        statementData["totalVolumeCredits"] = self.totalVolumeCredits(statementData)
         return RenderPlainText(statementData, self.plays)()
     
     def enrichPerformance(self, aPerformance):
@@ -71,6 +73,18 @@ class Statement():
             result += math.floor(aPerformance.get('audience') / 5)
         return result
 
+    def totalAmount(self, data):
+        result = 0  
+        for perf in data['performances']:               
+            result += perf['amount']
+        return result
+    
+    def totalVolumeCredits(self, data):
+        result = 0        
+        for perf in data['performances']:
+            result += perf['volumeCredits']
+        return result
+    
 class RenderPlainText():
     
     def __init__(self, data, plays):
@@ -84,20 +98,8 @@ class RenderPlainText():
         for perf in self.data['performances']:               
             result += f"    {perf['play'].get('name')}: {self.usd(perf['amount'])} ({perf.get('audience')} seats)\n"
         
-        result += f"Amount owed is {self.usd(self.totalAmount())}\n"
-        result += f"You earned {self.totalVolumeCredits()} credits"
-        return result
-    
-    def totalAmount(self):
-        result = 0  
-        for perf in self.data['performances']:               
-            result += perf['amount']
-        return result
-    
-    def totalVolumeCredits(self):
-        result = 0        
-        for perf in self.data['performances']:
-            result += perf['volumeCredits']
+        result += f"Amount owed is {self.usd(self.data['totalAmount'])}\n"
+        result += f"You earned {self.data['totalVolumeCredits']} credits"
         return result
     
     def usd(self, aNumber):
