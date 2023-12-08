@@ -33,18 +33,22 @@ class Statement():
         self.plays = plays
         
     def __call__(self):
-        return RenderPlainText(self.invoice, self.plays)()
+        statementData = {}
+        statementData["customer"] = self.invoice.get("customer")
+        statementData["performances"] = self.invoice.get("performances")
+        return RenderPlainText(statementData, self.plays)()
 
 class RenderPlainText():
     
-    def __init__(self, invoice, plays):
-        self.invoice = invoice
+    def __init__(self, data, plays):
+        self.data = data
         self.plays = plays
+        
     
     def __call__(self):
-        result = f"Statement for {self.invoice['customer']}\n"
+        result = f"Statement for {self.data['customer']}\n"
         
-        for perf in self.invoice['performances']:               
+        for perf in self.data['performances']:               
             result += f"    {self.playFor(perf).get('name')}: {self.usd(self.amountFor(perf))} ({perf.get('audience')} seats)\n"
         
         result += f"Amount owed is {self.usd(self.totalAmount())}\n"
@@ -53,13 +57,13 @@ class RenderPlainText():
     
     def totalAmount(self):
         result = 0  
-        for perf in self.invoice['performances']:               
+        for perf in self.data['performances']:               
             result += self.amountFor(perf)
         return result
     
     def totalVolumeCredits(self):
         result = 0        
-        for perf in self.invoice['performances']:
+        for perf in self.data['performances']:
             result += self.volumeCreditsFor(perf)
         return result
     
