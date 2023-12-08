@@ -41,10 +41,27 @@ class Statement():
     def enrichPerformance(self, aPerformance):
         result = aPerformance
         result['play'] = self.playFor(aPerformance)
+        result['amount'] = self.amountFor(result)
         return result
     
     def playFor(self, aPerformance):
         return self.plays[aPerformance.get("playID")]
+    
+    def amountFor(self, aPerformance):
+        result = 0
+        match aPerformance['play'].get('type'):
+            case "tragedy":
+                result = 40000
+                if aPerformance.get('audience') > 30:
+                    result += 1000 * (aPerformance.get('audience') - 30)
+            case "comedy":
+                result = 40000
+                if aPerformance.get('audience') > 20:
+                    result += 500 * (aPerformance.get('audience') - 20)
+                result += 300 * aPerformance.get('audience')
+            case _:
+                raise Exception(f"unknown type: {aPerformance['play'].get('type')}")
+        return result
 
 class RenderPlainText():
     
@@ -57,7 +74,7 @@ class RenderPlainText():
         result = f"Statement for {self.data['customer']}\n"
         
         for perf in self.data['performances']:               
-            result += f"    {perf['play'].get('name')}: {self.usd(self.amountFor(perf))} ({perf.get('audience')} seats)\n"
+            result += f"    {perf['play'].get('name')}: {self.usd(perf['amount'])} ({perf.get('audience')} seats)\n"
         
         result += f"Amount owed is {self.usd(self.totalAmount())}\n"
         result += f"You earned {self.totalVolumeCredits()} credits"
@@ -66,7 +83,7 @@ class RenderPlainText():
     def totalAmount(self):
         result = 0  
         for perf in self.data['performances']:               
-            result += self.amountFor(perf)
+            result += perf['amount']
         return result
     
     def totalVolumeCredits(self):
@@ -84,22 +101,6 @@ class RenderPlainText():
         result += max(aPerformance.get('audience') - 30, 0)
         if "comedy" == aPerformance['play'].get('type'): 
             result += math.floor(aPerformance.get('audience') / 5)
-        return result
-    
-    def amountFor(self, aPerformance):
-        result = 0
-        match aPerformance['play'].get('type'):
-            case "tragedy":
-                result = 40000
-                if aPerformance.get('audience') > 30:
-                    result += 1000 * (aPerformance.get('audience') - 30)
-            case "comedy":
-                result = 40000
-                if aPerformance.get('audience') > 20:
-                    result += 500 * (aPerformance.get('audience') - 20)
-                result += 300 * aPerformance.get('audience')
-            case _:
-                raise Exception(f"unknown type: {aPerformance['play'].get('type')}")
         return result
     
     
