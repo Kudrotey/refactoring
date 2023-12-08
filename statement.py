@@ -33,12 +33,15 @@ class Statement():
         self.plays = plays
         
     def __call__(self):
+        return RenderPlainText(self.createStatementData(self.invoice), self.plays)()
+    
+    def createStatementData(self, invoice):
         statementData = {}
-        statementData["customer"] = self.invoice.get("customer")
-        statementData["performances"] = list(map(self.enrichPerformance, self.invoice.get("performances")))
+        statementData["customer"] = invoice.get("customer")
+        statementData["performances"] = list(map(self.enrichPerformance, invoice.get("performances")))
         statementData["totalAmount"] = self.totalAmount(statementData)
         statementData["totalVolumeCredits"] = self.totalVolumeCredits(statementData)
-        return RenderPlainText(statementData, self.plays)()
+        return statementData
     
     def enrichPerformance(self, aPerformance):
         result = aPerformance
