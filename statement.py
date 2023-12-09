@@ -37,7 +37,10 @@ class RenderStatement():
         statementData = Statement(self.data, self.plays)()
         if statementFormat == 'plain':
             return self.renderPlainText(statementData)
-    
+        elif statementData == "html":
+            return self.renderHTML(statementData)
+        
+        
     def renderPlainText(self, data):
         result = f"Statement for {data['customer']}\n"
         
@@ -46,6 +49,20 @@ class RenderStatement():
         
         result += f"Amount owed is {self.usd(data['totalAmount'])}\n"
         result += f"You earned {data['totalVolumeCredits']} credits"
+        return result
+    
+    def renderHTML(self, data):
+        result = f"<h1>Statement for {data['customer']}</h1>\n"
+        result += "<table>\n"
+        result += "<tr><th>play</th><th>seats</th><th>cost</th></tr>"
+        
+        for perf in self.data['performances']:               
+            result += f"    <tr><td>{perf['play'].get('name')}</td><td>{perf.get('audience')}</td>"
+            result += f"<td>{self.usd(perf['amount'])}</td></tr>\n"
+        
+        result += "</table>\n"
+        result += f"<p>Amount owed is <em>{self.usd(data['totalAmount'])}</em></p>\n"
+        result += f"<p>You earned <em>{data['totalVolumeCredits']}</em> credits</p>\n"
         return result
     
     
