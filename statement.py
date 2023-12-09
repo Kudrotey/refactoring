@@ -1,6 +1,5 @@
 import locale
-import math
-from typing import Any
+from create_statement_data import Statement
 
 
 plays = {
@@ -27,83 +26,28 @@ invoices = {
         ]
     }
 
-class Statement():
-    def __init__(self, invoice, plays):
-        self.invoice = invoice
-        self.plays = plays
-        
-    def __call__(self):
-        return RenderPlainText(self.createStatementData(self.invoice), self.plays)()
-    
-    def createStatementData(self, invoice):
-        statementData = {}
-        statementData["customer"] = invoice.get("customer")
-        statementData["performances"] = list(map(self.enrichPerformance, invoice.get("performances")))
-        statementData["totalAmount"] = self.totalAmount(statementData)
-        statementData["totalVolumeCredits"] = self.totalVolumeCredits(statementData)
-        return statementData
-    
-    def enrichPerformance(self, aPerformance):
-        result = aPerformance
-        result['play'] = self.playFor(result)
-        result['amount'] = self.amountFor(result)
-        result['volumeCredits'] = self.volumeCreditsFor(result)
-        return result
-    
-    def playFor(self, aPerformance):
-        return self.plays[aPerformance.get("playID")]
-    
-    def amountFor(self, aPerformance):
-        result = 0
-        match aPerformance['play'].get('type'):
-            case "tragedy":
-                result = 40000
-                if aPerformance.get('audience') > 30:
-                    result += 1000 * (aPerformance.get('audience') - 30)
-            case "comedy":
-                result = 40000
-                if aPerformance.get('audience') > 20:
-                    result += 500 * (aPerformance.get('audience') - 20)
-                result += 300 * aPerformance.get('audience')
-            case _:
-                raise Exception(f"unknown type: {aPerformance['play'].get('type')}")
-        return result
-    
-    def volumeCreditsFor(self, aPerformance):
-        result = 0
-        result += max(aPerformance.get('audience') - 30, 0)
-        if "comedy" == aPerformance['play'].get('type'): 
-            result += math.floor(aPerformance.get('audience') / 5)
-        return result
 
-    def totalAmount(self, data):
-        result = 0  
-        for perf in data['performances']:               
-            result += perf['amount']
-        return result
-    
-    def totalVolumeCredits(self, data):
-        result = 0        
-        for perf in data['performances']:
-            result += perf['volumeCredits']
-        return result
-    
-class RenderPlainText():
+class RenderStatement():
     
     def __init__(self, data, plays):
         self.data = data
         self.plays = plays
         
+    def __call__(self, statementFormat):
+        statementData = Statement(self.data, self.plays)()
+        if statementFormat == 'plain':
+            return self.renderPlainText(statementData)
     
-    def __call__(self):
-        result = f"Statement for {self.data['customer']}\n"
+    def renderPlainText(self, data):
+        result = f"Statement for {data['customer']}\n"
         
         for perf in self.data['performances']:               
             result += f"    {perf['play'].get('name')}: {self.usd(perf['amount'])} ({perf.get('audience')} seats)\n"
         
-        result += f"Amount owed is {self.usd(self.data['totalAmount'])}\n"
-        result += f"You earned {self.data['totalVolumeCredits']} credits"
+        result += f"Amount owed is {self.usd(data['totalAmount'])}\n"
+        result += f"You earned {data['totalVolumeCredits']} credits"
         return result
+    
     
     def usd(self, aNumber):
         locale.setlocale(locale.LC_ALL, '')
@@ -112,4 +56,4 @@ class RenderPlainText():
 
     
     
-print(Statement(invoice=invoices, plays=plays)())
+print(RenderStatement(data=invoices, plays=plays)(statementFormat="plain"))
