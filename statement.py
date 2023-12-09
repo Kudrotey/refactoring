@@ -37,9 +37,10 @@ class RenderStatement():
         statementData = Statement(self.data, self.plays)()
         if statementFormat == 'plain':
             return self.renderPlainText(statementData)
-        elif statementData == "html":
+        elif statementFormat == "html":
             return self.renderHTML(statementData)
-        
+        else:
+            return "please provide either 'plain' or 'html' as the statement format"
         
     def renderPlainText(self, data):
         result = f"Statement for {data['customer']}\n"
@@ -54,7 +55,7 @@ class RenderStatement():
     def renderHTML(self, data):
         result = f"<h1>Statement for {data['customer']}</h1>\n"
         result += "<table>\n"
-        result += "<tr><th>play</th><th>seats</th><th>cost</th></tr>"
+        result += "<tr><th>play</th><th>seats</th><th>cost</th></tr>\n"
         
         for perf in self.data['performances']:               
             result += f"    <tr><td>{perf['play'].get('name')}</td><td>{perf.get('audience')}</td>"
