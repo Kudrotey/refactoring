@@ -20,6 +20,13 @@ class PerformanceCalculator():
             case _:
                 raise Exception(f"unknown type: {self.aPlay.get('type')}")
         return result
+    
+    def volume(self):
+        result = 0
+        result += max(self.aPerformance.get('audience') - 30, 0)
+        if "comedy" == self.aPlay.get('type'): 
+            result += math.floor(self.aPerformance.get('audience') / 5)
+        return result
 
 class Statement():
     def __init__(self, invoice, plays):
@@ -29,7 +36,8 @@ class Statement():
     def createStatement(self):
         statementData = {}
         statementData["customer"] = self.invoice.get("customer")
-        statementData["performances"] = list(map(self.enrichPerformance, self.invoice.get("performances")))
+        statementData["performances"] = list(map(self.enrichPerformance, 
+                                                 self.invoice.get("performances")))
         statementData["totalAmount"] = self.totalAmount(statementData)
         statementData["totalVolumeCredits"] = self.totalVolumeCredits(statementData)
         return statementData
@@ -39,7 +47,7 @@ class Statement():
         result = aPerformance
         result['play'] = calculator.aPlay
         result['amount'] = calculator.amount()
-        result['volumeCredits'] = self.volumeCreditsFor(result)
+        result['volumeCredits'] = calculator.volume()
         return result
     
     def playFor(self, aPerformance):
@@ -49,11 +57,7 @@ class Statement():
         return PerformanceCalculator(aPerformance, self.playFor(aPerformance)).amount()
     
     def volumeCreditsFor(self, aPerformance):
-        result = 0
-        result += max(aPerformance.get('audience') - 30, 0)
-        if "comedy" == aPerformance['play'].get('type'): 
-            result += math.floor(aPerformance.get('audience') / 5)
-        return result
+        return PerformanceCalculator(aPerformance, self.playFor(aPerformance)).volume()
 
     def totalAmount(self, data):
         result = 0  
