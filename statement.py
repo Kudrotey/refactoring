@@ -34,7 +34,7 @@ class RenderStatement():
         self.plays = plays
         
     def __call__(self, statementFormat):
-        statementData = Statement(self.data, self.plays)()
+        statementData = Statement(self.data, self.plays).createStatement()
         if statementFormat == 'plain':
             return self.renderPlainText(statementData)
         elif statementFormat == "html":

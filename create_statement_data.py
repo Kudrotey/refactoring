@@ -5,7 +5,7 @@ class Statement():
         self.invoice = invoice
         self.plays = plays
             
-    def __call__(self):
+    def createStatement(self):
         statementData = {}
         statementData["customer"] = self.invoice.get("customer")
         statementData["performances"] = list(map(self.enrichPerformance, self.invoice.get("performances")))
