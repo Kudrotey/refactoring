@@ -1,33 +1,5 @@
 import math
 
-class PerformanceCalculator():
-    def __init__(self, aPerformance, aPlay):
-        self.aPerformance = aPerformance
-        self.aPlay = aPlay
-
-    def amount(self):
-        result = 0
-        match self.aPlay.get('type'):
-            case "tragedy":
-                result = 40000
-                if self.aPerformance.get('audience') > 30:
-                    result += 1000 * (self.aPerformance.get('audience') - 30)
-            case "comedy":
-                result = 40000
-                if self.aPerformance.get('audience') > 20:
-                    result += 500 * (self.aPerformance.get('audience') - 20)
-                result += 300 * self.aPerformance.get('audience')
-            case _:
-                raise Exception(f"unknown type: {self.aPlay.get('type')}")
-        return result
-    
-    def volume(self):
-        result = 0
-        result += max(self.aPerformance.get('audience') - 30, 0)
-        if "comedy" == self.aPlay.get('type'): 
-            result += math.floor(self.aPerformance.get('audience') / 5)
-        return result
-
 class Statement():
     def __init__(self, invoice, plays):
         self.invoice = invoice
@@ -43,12 +15,21 @@ class Statement():
         return statementData
     
     def enrichPerformance(self, aPerformance):
-        calculator = PerformanceCalculator(aPerformance, self.playFor(aPerformance))
+        calculator = self.createPeformanceCalculator(aPerformance, self.playFor(aPerformance))
         result = aPerformance
         result['play'] = calculator.aPlay
         result['amount'] = calculator.amount()
         result['volumeCredits'] = calculator.volume()
         return result
+    
+    def createPeformanceCalculator(self, aPerformance, aPlay):
+        match aPlay.get('type'):
+            case "tragedy":
+                return TragedyCalculator(aPerformance, aPlay)
+            case "comedy":
+                return ComedyCalculator(aPerformance, aPlay)
+            case _:
+                raise Exception(f"unknown type: {self.aPlay.get('type')}")
     
     def playFor(self, aPerformance):
         return self.plays[aPerformance.get("playID")]
@@ -70,3 +51,36 @@ class Statement():
         for perf in data['performances']:
             result += perf['volumeCredits']
         return result
+    
+    
+
+class PerformanceCalculator():
+    def __init__(self, aPerformance, aPlay):
+        self.aPerformance = aPerformance
+        self.aPlay = aPlay
+
+    def amount(self):
+        raise Exception('subclass responsibility')
+        # raise Exception(f"unknown type: {self.aPlay.get('type')}")   
+         
+    def volume(self):
+        return max(self.aPerformance.get('audience') - 30, 0)
+    
+class TragedyCalculator(PerformanceCalculator):
+    def amount(self):
+        result = 40000
+        if self.aPerformance.get('audience') > 30:
+            result += 1000 * (self.aPerformance.get('audience') - 30)
+        return result
+    
+class ComedyCalculator(PerformanceCalculator):
+    def amount(self):
+        result = 40000
+        if self.aPerformance.get('audience') > 20:
+            result += 500 * (self.aPerformance.get('audience') - 20)
+        result += 300 * self.aPerformance.get('audience')
+        return result
+    
+    def volume(self):
+        return super().volume() + math.floor(self.aPerformance.get('audience') / 5)
+    
