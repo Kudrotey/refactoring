@@ -60,8 +60,7 @@ class PerformanceCalculator():
         self.aPlay = aPlay
 
     def amount(self):
-        raise Exception('subclass responsibility')
-        # raise Exception(f"unknown type: {self.aPlay.get('type')}")   
+        raise Exception('subclass responsibility') 
          
     def volume(self):
         return max(self.aPerformance.get('audience') - 30, 0)
