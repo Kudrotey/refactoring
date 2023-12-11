@@ -19,7 +19,7 @@ class Statement():
         result = aPerformance
         result['play'] = calculator.aPlay
         result['amount'] = calculator.amount()
-        result['volumeCredits'] = calculator.volume()
+        result['volumeCredits'] = calculator.volumeCredits()
         return result
     
     def createPeformanceCalculator(self, aPerformance, aPlay):
@@ -38,7 +38,7 @@ class Statement():
         return PerformanceCalculator(aPerformance, self.playFor(aPerformance)).amount()
     
     def volumeCreditsFor(self, aPerformance):
-        return PerformanceCalculator(aPerformance, self.playFor(aPerformance)).volume()
+        return PerformanceCalculator(aPerformance, self.playFor(aPerformance)).volumeCredits()
 
     def totalAmount(self, data):
         result = 0  
@@ -62,7 +62,7 @@ class PerformanceCalculator():
     def amount(self):
         raise Exception('subclass responsibility') 
          
-    def volume(self):
+    def volumeCredits(self):
         return max(self.aPerformance.get('audience') - 30, 0)
     
 class TragedyCalculator(PerformanceCalculator):
@@ -81,5 +81,5 @@ class ComedyCalculator(PerformanceCalculator):
         return result
     
     def volume(self):
-        return super().volume() + math.floor(self.aPerformance.get('audience') / 5)
+        return super().volumeCredits() + math.floor(self.aPerformance.get('audience') / 5)
     
